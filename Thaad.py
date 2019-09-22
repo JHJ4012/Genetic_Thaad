@@ -1,11 +1,12 @@
 import math
 from random import randint
+import numpy as np
 
 thaad_number = 10
 bullet_number = 20
 gravity = 10
 
-genetic_lists = []   #각 사드의 유전자를 전부 저장할 리스트
+# genetic_lists = []   #각 사드의 유전자를 전부 저장할 리스트
 genetic_info = []   #유전자 리스트
 score_list = []     #점수 리스트
 for_evaluate_distance = []  #점수 매기기 위해 distance 넣어둘 리스트
@@ -177,7 +178,7 @@ class Thaad:
 for i in range(thaad_number):
     succeed.clear()
     for_evaluate_distance.clear()
-    genetic_info.clear()            #뒤에 두니까 genetic_lists에 저장 되는 도중에 clear 되서 저장이 안 되는거 같아서 앞으로 옮김.
+    # genetic_info.clear()            #뒤에 두니까 genetic_lists에 저장 되는 도중에 clear 되서 저장이 안 되는거 같아서 앞으로 옮김.
 
     for j in range(bullet_number):
         enemy = Enemy(randint(7000, 10000), randint(20, 70))    # 우선 상대방은 무조건 우리 땅에 맞춰야됨. 우리 땅 면접 7000에서 10000.
@@ -185,13 +186,16 @@ for i in range(thaad_number):
         enemy.calculate_Speed()
         enemy.bullet_Location_At_Thousand()
 
-        thaad = Thaad(randint(200, 500), math.radians(randint(20, 70)), randint(10, 20), enemy)   #범위 임의로 줌.
+        thaad = Thaad(randint(200, 500), math.radians(randint(20, 70)), randint(10, 20), enemy)   #범위 임의로 줌.    이거 맨 처음에만 이렇게 주는 거임 if문으로 처리 해야됨.
+        # 두번 째부터는 교배되고 돌연변이 된 것으로 진행. 만약 유전자에 없으면 랜덤. 이거 바꿔야됨.
         thaad.bomb_Bullet_Location()
         thaad.succeed_Or_Failed()
         thaad.store_Genetics()
 
-    print('각 개체의 유전자 정보', genetic_info)
-    genetic_lists.append(genetic_info)      #일단은 이렇게 하는데 더 좋은 방법 생각해보기
+    print('각 개체의 유전자 정보', genetic_info)     #이거 genetic_info 객체를 넣었기 때문에 안의 값이 아니고 주소 값이 들어가서 clear할 때 값 없어지고 마지막 것만 10개 들어가게 되는 것.
+    # -> 해결. numpy로 해결. genetic_info에 그냥 200가지 정보 전부 다 genetic_lists에 넣은 다음에 이 것을 10,20의 2차원 배열로 바꿧음.
+
+genetic_lists = np.array(genetic_info).reshape(thaad_number, bullet_number)   #genetic_lists는 1세대에서의 모든 사드 객체에 대한 정보 가지고 있음
 
 print('유전자 정보 들어간거 전체', genetic_lists)
 
@@ -209,3 +213,5 @@ print('유전자 정보 들어간거 전체', genetic_lists)
 #이제 할 일 : 점수 정하기. -> 폭탄 터지는 시간에 서로 떨어져있는 거리로 점수 주기. 멀리 떨어질 수록 감점. (200 범위 안에 있으면 점수를 더 많이 주는 것도 생각해보기)
 #점수 높은 것 두 개 뽑아 교배.
 # 컨트롤러에서 for문 안에서 사드 발사시킬 때 if문으로 만약에 genetic_lists에 들어있는 정보로 상대 적 미사일이 쏜다면 그에 해당하는 사드 정보로 발사하도록 하기.
+
+# 지금은 class 2개로 돌리는데 class를 합치고 메서드로 할까 고민해보기
