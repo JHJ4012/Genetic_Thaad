@@ -5,6 +5,7 @@ import numpy as np
 thaad_number = 10
 bullet_number = 20
 gravity = 10
+# score = 100
 
 # genetic_lists = []   #각 사드의 유전자를 전부 저장할 리스트
 genetic_info = []   #유전자 리스트
@@ -78,6 +79,9 @@ class Thaad:
     thaad_bullet_y_rounds = 0
 
     thaad_and_enemy_distance = 0
+
+    good_genetic_index1 = 0
+    good_genetic_index2 = 0
 
     def __init__(self, first_speed, angle, bomb_time, enemy_info):  #각종 초기화
         self.thaad_first_speed = first_speed
@@ -172,11 +176,35 @@ class Thaad:
         # 이 부분에서 다른 방법이 있을거임.
         # print('유전자 정보', genetic_info)
 
+    def give_Score(self):
+        # global score    # 전역 변수를 수정하기 위해 global 붙여줌
+        sum_score = 0
+        for i in range(len(for_evaluate_distance)):
+            # 10m에 0.1점 씩 차감. 0m일 때가 100점.
+            score = 100
+            for_calculate = (for_evaluate_distance[i]/10) * 0.1
+            score -= for_calculate
+            sum_score += score
+        #     print('각 점수', score)
+        print('점수 합계들', sum_score)
+        average_score = sum_score/bullet_number
+        score_list.append(average_score)        # 각 사드의 평균 점수의 값이 들어간다
+
+    def select_Good_Genetic(self):
+        copy_score_list = []
+        for i in range(len(score_list)):
+            copy_score_list.append(score_list[i])
+        copy_score_list.sort()
+
+        self.good_genetic_index1 = score_list.index(copy_score_list[-1])
+        self.good_genetic_index2 = score_list.index(copy_score_list[-2])
+
+        print(self.good_genetic_index1, self.good_genetic_index2)           #한 세대에서 가장 점수가 높은 것의 인덱스를 가져왔음.
 
 #진행 시킬 컨트롤러
 
 for i in range(thaad_number):
-    succeed.clear()
+    succeed.clear()     #나중에 UI 만들 때 쓸꺼임. 표시하도록.
     for_evaluate_distance.clear()
     # genetic_info.clear()            #뒤에 두니까 genetic_lists에 저장 되는 도중에 clear 되서 저장이 안 되는거 같아서 앞으로 옮김.
 
@@ -192,12 +220,18 @@ for i in range(thaad_number):
         thaad.succeed_Or_Failed()
         thaad.store_Genetics()
 
-    print('각 개체의 유전자 정보', genetic_info)     #이거 genetic_info 객체를 넣었기 때문에 안의 값이 아니고 주소 값이 들어가서 clear할 때 값 없어지고 마지막 것만 10개 들어가게 되는 것.
+    thaad.give_Score()
+    print('점수 목록', score_list)
+
+    # print('각 개체의 유전자 정보', genetic_info)     #이거 genetic_info 객체를 넣었기 때문에 안의 값이 아니고 주소 값이 들어가서 clear할 때 값 없어지고 마지막 것만 10개 들어가게 되는 것.
     # -> 해결. numpy로 해결. genetic_info에 그냥 200가지 정보 전부 다 genetic_lists에 넣은 다음에 이 것을 10,20의 2차원 배열로 바꿧음.
 
 genetic_lists = np.array(genetic_info).reshape(thaad_number, bullet_number)   #genetic_lists는 1세대에서의 모든 사드 객체에 대한 정보 가지고 있음
 
-print('유전자 정보 들어간거 전체', genetic_lists)
+
+thaad.select_Good_Genetic()
+
+# print('유전자 정보 들어간거 전체', genetic_lists)
 
 
 # 사드의 유전자 : 속도, 각도, 폭탄 시간.
@@ -207,10 +241,10 @@ print('유전자 정보 들어간거 전체', genetic_lists)
 
 # 유전자 정보 저장할 배열 생성
 # 점수 주기.
+
 # 우수한 유전자 교배 및 돌연변이 생성
 # 반복.
 
-#이제 할 일 : 점수 정하기. -> 폭탄 터지는 시간에 서로 떨어져있는 거리로 점수 주기. 멀리 떨어질 수록 감점. (200 범위 안에 있으면 점수를 더 많이 주는 것도 생각해보기)
 #점수 높은 것 두 개 뽑아 교배.
 # 컨트롤러에서 for문 안에서 사드 발사시킬 때 if문으로 만약에 genetic_lists에 들어있는 정보로 상대 적 미사일이 쏜다면 그에 해당하는 사드 정보로 발사하도록 하기.
 
