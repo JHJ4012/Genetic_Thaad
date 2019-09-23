@@ -5,16 +5,16 @@ import numpy as np
 thaad_number = 10
 bullet_number = 20
 gravity = 10
-# score = 100
+#score = 100
 
-# genetic_lists = []   #각 사드의 유전자를 전부 저장할 리스트
+genetic_list1 = {}   #각 사드의 유전자를 전부 저장할 리스트
+genetic_list2 = {}
 genetic_info = []   #유전자 리스트
 score_list = []     #점수 리스트
 for_evaluate_distance = []  #점수 매기기 위해 distance 넣어둘 리스트
 succeed = []
 
-#적 미사일
-class Enemy:
+class Thaad:
 
     enemy_bullet_x_at_thousand = 0
     enemy_bullet_y_at_thousand = 0
@@ -26,6 +26,27 @@ class Enemy:
     enemy_horizon_speed = 0
     enemy_first_speed = 0
     time_at_thousand = 0
+
+    thaad_bullet_x = 0
+    thaad_bullet_y = 0
+
+    thaad_first_speed = 0
+    thaad_angle = 0
+    thaad_bomb_time = 0
+
+    thaad_horizon_speed = 0
+    thaad_vertical_speed = 0
+
+    enemy_bullet_x_for_bomb = 0
+    enemy_bullet_y_for_bomb = 0
+    enemy_bullet_time_for_bomb = 0
+
+    enemy_bullet_x_rounds = 0
+    enemy_bullet_y_rounds = 0
+    thaad_bullet_x_rounds = 0
+    thaad_bullet_y_rounds = 0
+
+    thaad_and_enemy_distance = 0
 
     def __init__(self, target_point, enemy_angle):  # 적 미사일의 목표 지점, 적 미사일의 각도 초기화.
         self.target_point = target_point
@@ -53,43 +74,13 @@ class Enemy:
         # print('적 미사일 1000에서 x좌표', self.enemy_bullet_x_at_thousand)
         # print('적 미사일 1000에서 y좌표', self.enemy_bullet_y_at_thousand)
 
-#우리편 사드
-class Thaad:
 
-    found_enemy_horizon_speed = 0
-    found_enemy_vertical_speed = 0
-
-    thaad_bullet_x = 0
-    thaad_bullet_y = 0
-
-    thaad_first_speed = 0
-    thaad_angle = 0
-    thaad_bomb_time = 0
-
-    thaad_horizon_speed = 0
-    thaad_vertical_speed = 0
-
-    enemy_bullet_x_for_bomb = 0
-    enemy_bullet_y_for_bomb = 0
-    enemy_bullet_time_for_bomb = 0
-
-    enemy_bullet_x_rounds = 0
-    enemy_bullet_y_rounds = 0
-    thaad_bullet_x_rounds = 0
-    thaad_bullet_y_rounds = 0
-
-    thaad_and_enemy_distance = 0
-
-    good_genetic_index1 = 0
-    good_genetic_index2 = 0
-
-    def __init__(self, first_speed, angle, bomb_time, enemy_info):  #각종 초기화
-        self.thaad_first_speed = first_speed
-        self.thaad_angle = angle
-        self.thaad_bomb_time = bomb_time
-        self.found_enemy_horizon_speed = round(enemy_info.enemy_horizon_speed)
-        self.found_enemy_vertical_speed = round(enemy_info.enemy_vertical_speed)
-
+    def shoot_Thaad(self):
+        self.thaad_first_speed = randint(200, 500)
+        self.thaad_angle = math.radians(randint(20, 70))
+        self.thaad_bomb_time = randint(10, 20)
+        self.found_enemy_horizon_speed = round(self.enemy_horizon_speed)
+        self.found_enemy_vertical_speed = round(self.enemy_vertical_speed)
         # self.enemy_bullet_time_for_bomb = enemy_info.time_at_thousand + bomb_time
 
         # 이게 적으로부터 가져오는 정보.  적의 초기 수직, 수평 속도
@@ -167,7 +158,7 @@ class Thaad:
         #폭발 범위를 늘리기는 폭발 범위 너무 커야된다. 폭발 범위는 왠만하면 그대로.
         #일단 교배 시키고 진행 시키다가 조절하기. 교배하다보면 우수한 유전자로 나중에는 확률이 많이 올라갈 수도 있음.
 
-    def store_Genetics(self):           #유전자 정보를 저장.
+    def store_All_Genetics(self):           #유전자 정보를 저장.
         for_store_enemy = str(self.found_enemy_horizon_speed) + ',' +str(self.found_enemy_vertical_speed)
         for_store_thaad = str(self.thaad_first_speed) + ',' + str(self.thaad_angle) + ',' + str(self.thaad_bomb_time)
         for_store_boths_info = for_store_enemy + ',' + for_store_thaad
@@ -175,7 +166,6 @@ class Thaad:
         # genetic_info 안에는 '적 수평 속도, 적 수직 속도, 사드 초기 속도, 사드 각도, 사드 폭탄 시간' 이렇게 저장됨.
         # 이 부분에서 다른 방법이 있을거임.
         # print('유전자 정보', genetic_info)
-
     def give_Score(self):
         # global score    # 전역 변수를 수정하기 위해 global 붙여줌
         sum_score = 0
@@ -201,35 +191,54 @@ class Thaad:
 
         print(self.good_genetic_index1, self.good_genetic_index2)           #한 세대에서 가장 점수가 높은 것의 인덱스를 가져왔음.
 
-#진행 시킬 컨트롤러
+    def store_Good_genetic(self):
+        for_divide_genetic1= []
+        for_divide_genetic2 = []
+        for i in range(bullet_number*self.good_genetic_index1, bullet_number*(self.good_genetic_index1+1)):
+            for_divide_genetic1.append(genetic_info[i])
+        for j in range(bullet_number*self.good_genetic_index2, bullet_number*(self.good_genetic_index2+1)):
+            for_divide_genetic2.append(genetic_info[j])
 
+        for i in range(bullet_number):
+            arr1 = for_divide_genetic1[i].split(',')
+            genetic_list1[arr1[0] + ',' + arr1[1]] = arr1[2] + ',' + arr1[3] + ',' + arr1[4]
+            arr2 = for_divide_genetic2[i].split(',')
+            genetic_list2[arr2[0] + ',' + arr2[1]] = arr2[2] + ',' + arr2[3] + ',' + arr2[4]
+
+        print('뛰어난 유전자 1',genetic_list1.keys())
+        print('뛰어난 유전자 2',genetic_list2.keys())
+        print('뛰어난 유전자 1', genetic_list1)
+        print('뛰어난 유전자 2', genetic_list2)
+
+#진행 시킬 컨트롤러
 for i in range(thaad_number):
-    succeed.clear()     #나중에 UI 만들 때 쓸꺼임. 표시하도록.
+    succeed.clear()
     for_evaluate_distance.clear()
     # genetic_info.clear()            #뒤에 두니까 genetic_lists에 저장 되는 도중에 clear 되서 저장이 안 되는거 같아서 앞으로 옮김.
-
     for j in range(bullet_number):
-        enemy = Enemy(randint(7000, 10000), randint(20, 70))    # 우선 상대방은 무조건 우리 땅에 맞춰야됨. 우리 땅 면접 7000에서 10000.
-                                                                # 각도는 20도에서 70도 사이.
-        enemy.calculate_Speed()
-        enemy.bullet_Location_At_Thousand()
+        thaad = Thaad(randint(7000, 10000), randint(20, 70))    # 우선 상대방은 무조건 우리 땅에 맞춰야됨. 우리 땅 면접 7000에서 10000. # 각도는 20도에서 70도 사이.
+        thaad.calculate_Speed()
+        thaad.bullet_Location_At_Thousand()
 
-        thaad = Thaad(randint(200, 500), math.radians(randint(20, 70)), randint(10, 20), enemy)   #범위 임의로 줌.    이거 맨 처음에만 이렇게 주는 거임 if문으로 처리 해야됨.
-        # 두번 째부터는 교배되고 돌연변이 된 것으로 진행. 만약 유전자에 없으면 랜덤. 이거 바꿔야됨.
+        thaad.shoot_Thaad()
+        # 두번 째부터는 교배되고 돌연변이 된 것으로 진행. 만약 유전자에 없으면 랜덤
         thaad.bomb_Bullet_Location()
         thaad.succeed_Or_Failed()
-        thaad.store_Genetics()
+        thaad.store_All_Genetics()
 
     thaad.give_Score()
     print('점수 목록', score_list)
 
-    # print('각 개체의 유전자 정보', genetic_info)     #이거 genetic_info 객체를 넣었기 때문에 안의 값이 아니고 주소 값이 들어가서 clear할 때 값 없어지고 마지막 것만 10개 들어가게 되는 것.
+    print('각 개체의 유전자 정보', genetic_info)
     # -> 해결. numpy로 해결. genetic_info에 그냥 200가지 정보 전부 다 genetic_lists에 넣은 다음에 이 것을 10,20의 2차원 배열로 바꿧음.
 
-genetic_lists = np.array(genetic_info).reshape(thaad_number, bullet_number)   #genetic_lists는 1세대에서의 모든 사드 객체에 대한 정보 가지고 있음
-
+# genetic_lists = np.array(genetic_info).reshape(thaad_number, bullet_number)   #genetic_lists는 1세대에서의 모든 사드 객체에 대한 정보 가지고 있음
+# print('유전 정보', genetic_lists)
+# print('fadsf', genetic_lists[0][1])
 
 thaad.select_Good_Genetic()
+
+thaad.store_Good_genetic()
 
 # print('유전자 정보 들어간거 전체', genetic_lists)
 
@@ -247,5 +256,3 @@ thaad.select_Good_Genetic()
 
 #점수 높은 것 두 개 뽑아 교배.
 # 컨트롤러에서 for문 안에서 사드 발사시킬 때 if문으로 만약에 genetic_lists에 들어있는 정보로 상대 적 미사일이 쏜다면 그에 해당하는 사드 정보로 발사하도록 하기.
-
-# 지금은 class 2개로 돌리는데 class를 합치고 메서드로 할까 고민해보기
