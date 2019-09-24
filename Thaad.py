@@ -5,7 +5,7 @@ import numpy as np
 thaad_number = 10
 bullet_number = 20
 gravity = 10
-#score = 100
+first_time = True
 
 genetic_list1 = {}   #각 사드의 유전자를 전부 저장할 리스트
 genetic_list2 = {}
@@ -13,6 +13,7 @@ genetic_info = []   #유전자 리스트
 score_list = []     #점수 리스트
 for_evaluate_distance = []  #점수 매기기 위해 distance 넣어둘 리스트
 succeed = []
+cross_over_genetic = {}
 
 class Thaad:
 
@@ -81,6 +82,7 @@ class Thaad:
         self.thaad_bomb_time = randint(10, 20)
         self.found_enemy_horizon_speed = round(self.enemy_horizon_speed)
         self.found_enemy_vertical_speed = round(self.enemy_vertical_speed)
+
         # self.enemy_bullet_time_for_bomb = enemy_info.time_at_thousand + bomb_time
 
         # 이게 적으로부터 가져오는 정보.  적의 초기 수직, 수평 속도
@@ -192,23 +194,49 @@ class Thaad:
         print(self.good_genetic_index1, self.good_genetic_index2)           #한 세대에서 가장 점수가 높은 것의 인덱스를 가져왔음.
 
     def store_Good_genetic(self):
-        for_divide_genetic1= []
+        for_divide_genetic1 = []
         for_divide_genetic2 = []
         for i in range(bullet_number*self.good_genetic_index1, bullet_number*(self.good_genetic_index1+1)):
             for_divide_genetic1.append(genetic_info[i])
         for j in range(bullet_number*self.good_genetic_index2, bullet_number*(self.good_genetic_index2+1)):
             for_divide_genetic2.append(genetic_info[j])
 
-        for i in range(bullet_number):
+        for i in range(bullet_number):                 
             arr1 = for_divide_genetic1[i].split(',')
             genetic_list1[arr1[0] + ',' + arr1[1]] = arr1[2] + ',' + arr1[3] + ',' + arr1[4]
             arr2 = for_divide_genetic2[i].split(',')
             genetic_list2[arr2[0] + ',' + arr2[1]] = arr2[2] + ',' + arr2[3] + ',' + arr2[4]
-
         print('뛰어난 유전자 1',genetic_list1.keys())
         print('뛰어난 유전자 2',genetic_list2.keys())
         print('뛰어난 유전자 1', genetic_list1)
         print('뛰어난 유전자 2', genetic_list2)
+        print(len(genetic_list1))
+        print(len(genetic_list2))
+
+    def crossOver(self):
+        length = 0  #맨 처음 20개 중에서도 수평, 수직이 같을 수 있기 떄문에 20개 아닐 수도 있다.
+        if len(genetic_list1) > len(genetic_list2):
+            length = len(genetic_list1)
+        elif len(genetic_list1) < len(genetic_list2):
+            length = len(genetic_list2)
+        else:
+            length = len(genetic_list1)
+
+        for i in range(length):
+            random_for_cross = randint(1,2)
+
+            if i >= len(genetic_list1):
+                cross_over_genetic[format(list(genetic_list2.keys())[i])] = format(list(genetic_list2.values())[i])
+            elif i >= len(genetic_list2):
+                cross_over_genetic[format(list(genetic_list1.keys())[i])] = format(list(genetic_list1.values())[i])
+            else:
+                if random_for_cross % 2 == 0:
+                    cross_over_genetic[format(list(genetic_list1.keys())[i])] = format(list(genetic_list1.values())[i])
+                else:
+                    cross_over_genetic[format(list(genetic_list2.keys())[i])] = format(list(genetic_list2.values())[i])
+
+        print('교배한 유전자', cross_over_genetic)
+
 
 #진행 시킬 컨트롤러
 for i in range(thaad_number):
@@ -240,6 +268,9 @@ thaad.select_Good_Genetic()
 
 thaad.store_Good_genetic()
 
+thaad.crossOver()
+
+
 # print('유전자 정보 들어간거 전체', genetic_lists)
 
 
@@ -247,12 +278,10 @@ thaad.store_Good_genetic()
 # 적으로부터 받는 정보 : 초기 수직, 수평 속도
 
 
-
-# 유전자 정보 저장할 배열 생성
-# 점수 주기.
-
 # 우수한 유전자 교배 및 돌연변이 생성
 # 반복.
 
 #점수 높은 것 두 개 뽑아 교배.
 # 컨트롤러에서 for문 안에서 사드 발사시킬 때 if문으로 만약에 genetic_lists에 들어있는 정보로 상대 적 미사일이 쏜다면 그에 해당하는 사드 정보로 발사하도록 하기.
+
+#클래스는 굳이 써야되는가??
