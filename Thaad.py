@@ -7,7 +7,7 @@ bullet_number = 20
 gravity = 10
 first_time = True
 
-genetic_list1 = {}   #각 사드의 유전자를 전부 저장할 리스트
+genetic_list1 = {}
 genetic_list2 = {}
 genetic_info = []   #유전자 리스트
 score_list = []     #점수 리스트
@@ -64,24 +64,38 @@ class Thaad:
         # print('적 미사일 초기 속도', self.enemy_first_speed)
         # print('적 미사일 수평 속도', self.enemy_horizon_speed)
         # print('적 미사일 수직 속도', self.enemy_vertical_speed)
-
-    def bullet_Location_At_Thousand(self):  # 적 미사일이 x좌표 1000까지 가는데 시간, x좌표 1000에서의 적 미사일 x,y 좌표 계산 후 초기화
-        self.time_at_thousand = 1000/self.enemy_horizon_speed
-        # print('적 미사일이 1000까지 가는데 시간', self.time_at_thousand)
-
-        self.enemy_bullet_x_at_thousand = 1000
-        self.enemy_bullet_y_at_thousand = (self.enemy_vertical_speed * self.time_at_thousand) - (0.5 * gravity * (self.time_at_thousand**2))
+    #
+    # def bullet_Location_At_Thousand(self):  # 적 미사일이 x좌표 1000까지 가는데 시간, x좌표 1000에서의 적 미사일 x,y 좌표 계산 후 초기화
+    #     self.time_at_thousand = 1000/self.enemy_horizon_speed
+    #     # print('적 미사일이 1000까지 가는데 시간', self.time_at_thousand)
+    #
+    #     self.enemy_bullet_x_at_thousand = 1000
+    #     self.enemy_bullet_y_at_thousand = (self.enemy_vertical_speed * self.time_at_thousand) - (0.5 * gravity * (self.time_at_thousand**2))
 
         # print('적 미사일 1000에서 x좌표', self.enemy_bullet_x_at_thousand)
         # print('적 미사일 1000에서 y좌표', self.enemy_bullet_y_at_thousand)
 
 
     def shoot_Thaad(self):
-        self.thaad_first_speed = randint(200, 500)
-        self.thaad_angle = math.radians(randint(20, 70))
-        self.thaad_bomb_time = randint(10, 20)
         self.found_enemy_horizon_speed = round(self.enemy_horizon_speed)
         self.found_enemy_vertical_speed = round(self.enemy_vertical_speed)
+
+        if first_time:
+            self.thaad_first_speed = randint(200, 500)
+            self.thaad_angle = math.radians(randint(20, 70))
+            self.thaad_bomb_time = randint(10, 20)
+        else:
+            value = str(self.found_enemy_horizon_speed) + ',' + str(self.found_enemy_vertical_speed)
+            if value in cross_over_genetic:
+                str2 = cross_over_genetic[value]
+                arr = str2.split(',')
+                self.thaad_first_speed = int(arr[0])
+                self.thaad_angle = float(arr[1])
+                self.thaad_bomb_time = int(arr[2])
+            else:
+                self.thaad_first_speed = randint(200, 500)
+                self.thaad_angle = math.radians(randint(20, 70))
+                self.thaad_bomb_time = randint(10, 20)
 
         # self.enemy_bullet_time_for_bomb = enemy_info.time_at_thousand + bomb_time
 
@@ -178,7 +192,7 @@ class Thaad:
             score -= for_calculate
             sum_score += score
         #     print('각 점수', score)
-        print('점수 합계들', sum_score)
+        # print('점수 합계들', sum_score)
         average_score = sum_score/bullet_number
         score_list.append(average_score)        # 각 사드의 평균 점수의 값이 들어간다
 
@@ -191,30 +205,36 @@ class Thaad:
         self.good_genetic_index1 = score_list.index(copy_score_list[-1])
         self.good_genetic_index2 = score_list.index(copy_score_list[-2])
 
-        print(self.good_genetic_index1, self.good_genetic_index2)           #한 세대에서 가장 점수가 높은 것의 인덱스를 가져왔음.
+        # print(self.good_genetic_index1, self.good_genetic_index2)           #한 세대에서 가장 점수가 높은 것의 인덱스를 가져왔음.
 
     def store_Good_genetic(self):
         for_divide_genetic1 = []
         for_divide_genetic2 = []
+        # print(genetic_info)
         for i in range(bullet_number*self.good_genetic_index1, bullet_number*(self.good_genetic_index1+1)):
             for_divide_genetic1.append(genetic_info[i])
         for j in range(bullet_number*self.good_genetic_index2, bullet_number*(self.good_genetic_index2+1)):
             for_divide_genetic2.append(genetic_info[j])
 
-        for i in range(bullet_number):                 
+        for i in range(bullet_number):
             arr1 = for_divide_genetic1[i].split(',')
             genetic_list1[arr1[0] + ',' + arr1[1]] = arr1[2] + ',' + arr1[3] + ',' + arr1[4]
             arr2 = for_divide_genetic2[i].split(',')
             genetic_list2[arr2[0] + ',' + arr2[1]] = arr2[2] + ',' + arr2[3] + ',' + arr2[4]
-        print('뛰어난 유전자 1',genetic_list1.keys())
-        print('뛰어난 유전자 2',genetic_list2.keys())
-        print('뛰어난 유전자 1', genetic_list1)
-        print('뛰어난 유전자 2', genetic_list2)
-        print(len(genetic_list1))
-        print(len(genetic_list2))
+        # print('뛰어난 유전자 1',genetic_list1.keys())
+        # print('뛰어난 유전자 2',genetic_list2.keys())
+        # print('뛰어난 유전자 1', genetic_list1)
+        # print('뛰어난 유전자 2', genetic_list2)
+
+        for i in range(len(cross_over_genetic)):    #여기 오면 안됨. 사드 10개의 cross_over 중 마지막에 된 것을 다 가져오기 떄문에.
+            genetic_list1[format(list(cross_over_genetic.keys())[i])] = format(list(cross_over_genetic.values())[i])
+            genetic_list2[format(list(cross_over_genetic.keys())[i])] = format(list(cross_over_genetic.values())[i])
 
     def crossOver(self):
-        length = 0  #맨 처음 20개 중에서도 수평, 수직이 같을 수 있기 떄문에 20개 아닐 수도 있다.
+        cross_over_genetic.clear()
+        # print('유전자정보1', genetic_list1)
+        # print('유전자정보2',genetic_list2)
+        length = 0
         if len(genetic_list1) > len(genetic_list2):
             length = len(genetic_list1)
         elif len(genetic_list1) < len(genetic_list2):
@@ -235,41 +255,81 @@ class Thaad:
                 else:
                     cross_over_genetic[format(list(genetic_list2.keys())[i])] = format(list(genetic_list2.values())[i])
 
-        print('교배한 유전자', cross_over_genetic)
+        # print('교배한 유전자', cross_over_genetic)
+
+    def mutation(self):
+        for i in range(len(cross_over_genetic)):
+            for_mutation = randint(1,2)
+            if for_mutation == 1:
+                cross_over_genetic[format(list(cross_over_genetic.keys())[i])] = str(randint(200, 500)) + ',' + str(math.radians(randint(20, 70))) + ',' + str(randint(10, 20))
 
 
 #진행 시킬 컨트롤러
-for i in range(thaad_number):
-    succeed.clear()
-    for_evaluate_distance.clear()
-    # genetic_info.clear()            #뒤에 두니까 genetic_lists에 저장 되는 도중에 clear 되서 저장이 안 되는거 같아서 앞으로 옮김.
-    for j in range(bullet_number):
-        thaad = Thaad(randint(7000, 10000), randint(20, 70))    # 우선 상대방은 무조건 우리 땅에 맞춰야됨. 우리 땅 면접 7000에서 10000. # 각도는 20도에서 70도 사이.
-        thaad.calculate_Speed()
-        thaad.bullet_Location_At_Thousand()
 
-        thaad.shoot_Thaad()
-        # 두번 째부터는 교배되고 돌연변이 된 것으로 진행. 만약 유전자에 없으면 랜덤
-        thaad.bomb_Bullet_Location()
-        thaad.succeed_Or_Failed()
-        thaad.store_All_Genetics()
+for i in range(1000):
+    if first_time:
+        for i in range(thaad_number):
+            # succeed.clear()
+            # genetic_info.clear()
+            for j in range(bullet_number):
+                thaad = Thaad(randint(7000, 10000), randint(20, 70))    # 우선 상대방은 무조건 우리 땅에 맞춰야됨. 우리 땅 면접 7000에서 10000. # 각도는 20도에서 70도 사이.
+                thaad.calculate_Speed()
+                # thaad.bullet_Location_At_Thousand()
 
-    thaad.give_Score()
-    print('점수 목록', score_list)
+                thaad.shoot_Thaad()
+                # 두번 째부터는 교배되고 돌연변이 된 것으로 진행. 만약 유전자에 없으면 랜덤
+                thaad.bomb_Bullet_Location()
+                thaad.succeed_Or_Failed()
+                thaad.store_All_Genetics()
 
-    print('각 개체의 유전자 정보', genetic_info)
-    # -> 해결. numpy로 해결. genetic_info에 그냥 200가지 정보 전부 다 genetic_lists에 넣은 다음에 이 것을 10,20의 2차원 배열로 바꿧음.
+            thaad.give_Score()
+            for_evaluate_distance.clear()
+            # print('점수 목록', score_list)
+            #
+            # print('각 개체의 유전자 정보', genetic_info)
+            # -> 해결. numpy로 해결. genetic_info에 그냥 200가지 정보 전부 다 genetic_lists에 넣은 다음에 이 것을 10,20의 2차원 배열로 바꿧음.
 
-# genetic_lists = np.array(genetic_info).reshape(thaad_number, bullet_number)   #genetic_lists는 1세대에서의 모든 사드 객체에 대한 정보 가지고 있음
-# print('유전 정보', genetic_lists)
-# print('fadsf', genetic_lists[0][1])
+        # genetic_lists = np.array(genetic_info).reshape(thaad_number, bullet_number)   #genetic_lists는 1세대에서의 모든 사드 객체에 대한 정보 가지고 있음
+        # print('유전 정보', genetic_lists)
+        # print('fadsf', genetic_lists[0][1])
+        first_time = False
+    else:
+        print(str(i),"세대 : ",'점수 목록', score_list)
+        genetic_list1.clear()
+        genetic_list2.clear()
+        thaad.select_Good_Genetic()
+        score_list.clear()
+        thaad.store_Good_genetic()
+        genetic_info.clear()
+        for i in range(thaad_number):
+            thaad.crossOver()
+            if i > thaad_number-3:
+                thaad.mutation()
+                # print('크로스오버정보',cross_over_genetic)
+            for j in range(bullet_number):
+                thaad = Thaad(randint(7000, 10000), randint(20, 70))
+                thaad.calculate_Speed()
+                thaad.shoot_Thaad()
+                thaad.bomb_Bullet_Location()
+                thaad.succeed_Or_Failed()
+                thaad.store_All_Genetics()
+            thaad.give_Score()
+            for_evaluate_distance.clear()
+            # print('각 개체의 유전자 정보', genetic_info)
 
-thaad.select_Good_Genetic()
+# print(cross_over_genetic)
 
-thaad.store_Good_genetic()
-
-thaad.crossOver()
-
+# cross over 된 유전자를 가지고 미사일 20개 대응.
+#
+# for i in range(thaad_number):
+#     cross over 시킴.
+#     for j in range(bullet_number):
+#         적 미사일 발사
+#         계산
+#
+#         shoot_Thaad 과정에서 생성하는거 필요 없음.
+#         이 안의 for문에서는 cross over 시킨 것 하나로만 함.
+#         위에서 바깥 쪽 for문으로 인해 사드 10번 생성되었는데 그거 필요 없음. 그걸 cross over가 함.
 
 # print('유전자 정보 들어간거 전체', genetic_lists)
 
