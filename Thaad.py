@@ -14,6 +14,7 @@ score_list = []     #점수 리스트
 for_evaluate_distance = []  #점수 매기기 위해 distance 넣어둘 리스트
 succeed = []
 cross_over_genetic = {}
+for_find_each_genetic_num = []
 
 class Thaad:
 
@@ -92,6 +93,7 @@ class Thaad:
                 self.thaad_first_speed = int(arr[0])
                 self.thaad_angle = float(arr[1])
                 self.thaad_bomb_time = int(arr[2])
+                # print('같다!!!!', value, self.thaad_first_speed,self.thaad_angle,self.thaad_bomb_time)
             else:
                 self.thaad_first_speed = randint(200, 500)
                 self.thaad_angle = math.radians(randint(20, 70))
@@ -182,6 +184,17 @@ class Thaad:
         # genetic_info 안에는 '적 수평 속도, 적 수직 속도, 사드 초기 속도, 사드 각도, 사드 폭탄 시간' 이렇게 저장됨.
         # 이 부분에서 다른 방법이 있을거임.
         # print('유전자 정보', genetic_info)
+
+    def store_Former_Genetic(self):
+        for i in range(len(cross_over_genetic)):    #여기 오면 안됨. 사드 10개의 cross_over 중 마지막에 된 것을 다 가져오기 떄문에.
+            cross_over_key = format(list(cross_over_genetic.keys())[i])
+            cross_over_value = format(list(cross_over_genetic.values())[i])
+            cross_over_key_arr = cross_over_key.split(',')
+            cross_over_value_arr = cross_over_value.split(',')
+            cross_over_key_value = cross_over_key_arr[0] + ',' + cross_over_key_arr[1] + ',' + cross_over_value_arr[0] + ',' + cross_over_value_arr[1] + ',' + cross_over_value_arr[2]
+            genetic_info.append(cross_over_key_value)
+        for_find_each_genetic_num.append(len(genetic_info))
+
     def give_Score(self):
         # global score    # 전역 변수를 수정하기 위해 global 붙여줌
         sum_score = 0
@@ -205,16 +218,33 @@ class Thaad:
         self.good_genetic_index1 = score_list.index(copy_score_list[-1])
         self.good_genetic_index2 = score_list.index(copy_score_list[-2])
 
+        # print('우수한 유전자', self.good_genetic_index1, self.good_genetic_index2)
         # print(self.good_genetic_index1, self.good_genetic_index2)           #한 세대에서 가장 점수가 높은 것의 인덱스를 가져왔음.
 
     def store_Good_genetic(self):
         for_divide_genetic1 = []
         for_divide_genetic2 = []
+
+        if first_time:
+            for i in range(bullet_number*self.good_genetic_index1, bullet_number*(self.good_genetic_index1+1)):
+                for_divide_genetic1.append(genetic_info[i])
+            for j in range(bullet_number*self.good_genetic_index2, bullet_number*(self.good_genetic_index2+1)):
+                for_divide_genetic2.append(genetic_info[j])
+        else:
+            if self.good_genetic_index1==0:
+                for i in range(0, for_find_each_genetic_num[self.good_genetic_index1]):
+                    for_divide_genetic1.append(genetic_info[i])
+            else:
+                for i in range(for_find_each_genetic_num[self.good_genetic_index1-1], for_find_each_genetic_num[self.good_genetic_index1]):
+                    for_divide_genetic1.append(genetic_info[i])
+
+            if self.good_genetic_index2==0:
+                for i in range(0, for_find_each_genetic_num[self.good_genetic_index2]):
+                    for_divide_genetic2.append(genetic_info[i])
+            else:
+                for i in range(for_find_each_genetic_num[self.good_genetic_index2-1], for_find_each_genetic_num[self.good_genetic_index2]):
+                    for_divide_genetic2.append(genetic_info[i])
         # print(genetic_info)
-        for i in range(bullet_number*self.good_genetic_index1, bullet_number*(self.good_genetic_index1+1)):
-            for_divide_genetic1.append(genetic_info[i])
-        for j in range(bullet_number*self.good_genetic_index2, bullet_number*(self.good_genetic_index2+1)):
-            for_divide_genetic2.append(genetic_info[j])
 
         for i in range(bullet_number):
             arr1 = for_divide_genetic1[i].split(',')
@@ -226,9 +256,8 @@ class Thaad:
         # print('뛰어난 유전자 1', genetic_list1)
         # print('뛰어난 유전자 2', genetic_list2)
 
-        for i in range(len(cross_over_genetic)):    #여기 오면 안됨. 사드 10개의 cross_over 중 마지막에 된 것을 다 가져오기 떄문에.
-            genetic_list1[format(list(cross_over_genetic.keys())[i])] = format(list(cross_over_genetic.values())[i])
-            genetic_list2[format(list(cross_over_genetic.keys())[i])] = format(list(cross_over_genetic.values())[i])
+        # print('뛰어난 유전자 1', genetic_list1)
+        # print('뛰어난 유전자 2', genetic_list2)
 
     def crossOver(self):
         cross_over_genetic.clear()
@@ -262,11 +291,11 @@ class Thaad:
             for_mutation = randint(1,2)
             if for_mutation == 1:
                 cross_over_genetic[format(list(cross_over_genetic.keys())[i])] = str(randint(200, 500)) + ',' + str(math.radians(randint(20, 70))) + ',' + str(randint(10, 20))
-
+        # print('교배한 유전자', cross_over_genetic)
 
 #진행 시킬 컨트롤러
 
-for i in range(1000):
+for generation in range(10000):
     if first_time:
         for i in range(thaad_number):
             # succeed.clear()
@@ -284,6 +313,12 @@ for i in range(1000):
 
             thaad.give_Score()
             for_evaluate_distance.clear()
+
+        thaad.select_Good_Genetic()
+        print(str(generation+1),"세대 : ",'점수 목록', score_list)
+        score_list.clear()
+        thaad.store_Good_genetic()
+        genetic_info.clear()
             # print('점수 목록', score_list)
             #
             # print('각 개체의 유전자 정보', genetic_info)
@@ -294,18 +329,11 @@ for i in range(1000):
         # print('fadsf', genetic_lists[0][1])
         first_time = False
     else:
-        print(str(i),"세대 : ",'점수 목록', score_list)
-        genetic_list1.clear()
-        genetic_list2.clear()
-        thaad.select_Good_Genetic()
-        score_list.clear()
-        thaad.store_Good_genetic()
-        genetic_info.clear()
         for i in range(thaad_number):
             thaad.crossOver()
             if i > thaad_number-3:
                 thaad.mutation()
-                # print('크로스오버정보',cross_over_genetic)
+            # print('크로스오버정보',cross_over_genetic)
             for j in range(bullet_number):
                 thaad = Thaad(randint(7000, 10000), randint(20, 70))
                 thaad.calculate_Speed()
@@ -314,8 +342,17 @@ for i in range(1000):
                 thaad.succeed_Or_Failed()
                 thaad.store_All_Genetics()
             thaad.give_Score()
+            # print('유전자 정보', genetic_info)
+            thaad.store_Former_Genetic()
             for_evaluate_distance.clear()
-            # print('각 개체의 유전자 정보', genetic_info)
+        genetic_list1.clear()
+        genetic_list2.clear()
+        thaad.select_Good_Genetic()
+        print(str(generation+1),"세대 : ",'점수 목록', score_list)
+        score_list.clear()
+        thaad.store_Good_genetic()
+        for_find_each_genetic_num.clear()
+        genetic_info.clear()
 
 # print(cross_over_genetic)
 
