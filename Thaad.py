@@ -3,7 +3,7 @@ from random import randint
 import numpy as np
 
 thaad_number = 10
-bullet_number = 50
+bullet_number = 100
 gravity = 10
 first_time = True
 
@@ -229,9 +229,7 @@ class Thaad:
         for i in range(len(cross_over_genetic)):
             cross_over_key = format(list(cross_over_genetic.keys())[i])
             cross_over_value = format(list(cross_over_genetic.values())[i])
-            cross_over_key_arr = cross_over_key.split(',')
-            cross_over_value_arr = cross_over_value.split(',')
-            cross_over_key_value = cross_over_key_arr[0] + ',' + cross_over_key_arr[1] + ',' + cross_over_value_arr[0] + ',' + cross_over_value_arr[1] + ',' + cross_over_value_arr[2]
+            cross_over_key_value = cross_over_key + ',' + cross_over_value
             genetic_info.append(cross_over_key_value)
         for_find_each_genetic_num.append(len(genetic_info))
 
@@ -243,6 +241,9 @@ class Thaad:
 
         self.good_genetic_index1 = score_list.index(copy_score_list[-1])
         self.good_genetic_index2 = score_list.index(copy_score_list[-2])
+
+        # print('점수 리스트', score_list)
+        # print('뛰어난 유전자는', self.good_genetic_index1, self.good_genetic_index2)
 
         # print('우수한 유전자', self.good_genetic_index1, self.good_genetic_index2)
         # print(self.good_genetic_index1, self.good_genetic_index2)           #한 세대에서 가장 점수가 높은 것의 인덱스를 가져왔음.
@@ -290,15 +291,15 @@ class Thaad:
         cross_over_genetic.clear()
         # print('유전자정보1', genetic_list1)
         # print('유전자정보2',genetic_list2)
-        length = 0
-        if len(genetic_list1) > len(genetic_list2):
-            length = len(genetic_list1)
-        elif len(genetic_list1) < len(genetic_list2):
-            length = len(genetic_list2)
-        else:
-            length = len(genetic_list1)
+        # length = 0
+        # if len(genetic_list1) > len(genetic_list2):
+        #     length = len(genetic_list1)
+        # elif len(genetic_list1) < len(genetic_list2):
+        #     length = len(genetic_list2)
+        # else:
+        #     length = len(genetic_list1)
 
-        for i in range(length):
+        # for i in range(length):
             # random_for_cross = randint(1,2)
             #
             # if i >= len(genetic_list1):
@@ -311,31 +312,38 @@ class Thaad:
             #     else:
             #         cross_over_genetic[format(list(genetic_list2.keys())[i])] = format(list(genetic_list2.values())[i])
 
-            if i < len(genetic_list1) and i < len(genetic_list2) :
-                if format(list(genetic_list1.keys())[i]) in genetic_list2:
-                    random_for_cross = randint(1,2)
-                    if random_for_cross == 1:
-                        cross_over_genetic[format(list(genetic_list1.keys())[i])] = format(list(genetic_list1.values())[i])
-                    else:
-                        cross_over_genetic[format(list(genetic_list2.keys())[i])] = format(list(genetic_list2.values())[i])
-                else:
-                    cross_over_genetic[format(list(genetic_list1.keys())[i])] = format(list(genetic_list1.values())[i])
+            # if i < len(genetic_list1) and i < len(genetic_list2) :
+            #     if format(list(genetic_list1.keys())[i]) in genetic_list2:
+            #         random_for_cross = randint(1,2)
+            #         if random_for_cross == 1:
+            #             cross_over_genetic[format(list(genetic_list1.keys())[i])] = format(list(genetic_list1.values())[i])
+            #         else:
+            #             cross_over_genetic[format(list(genetic_list2.keys())[i])] = genetic_list2[format(list(genetic_list1.keys())[i])]
+            #     else:
+            #         cross_over_genetic[format(list(genetic_list1.keys())[i])] = format(list(genetic_list1.values())[i])
+            #         cross_over_genetic[format(list(genetic_list2.keys())[i])] = format(list(genetic_list2.values())[i])
+            # elif i >= len(genetic_list1):
+            #     cross_over_genetic[format(list(genetic_list2.keys())[i])] = format(list(genetic_list2.values())[i])
+            # elif i >= len(genetic_list2):
+            #     if format(list(genetic_list1.keys())[i]) in genetic_list2:
+            #         random_for_cross = randint(1,2)
+            #         if random_for_cross == 1:
+            #             cross_over_genetic[format(list(genetic_list1.keys())[i])] = format(list(genetic_list1.values())[i])
+            #         else:
+            #             cross_over_genetic[format(list(genetic_list1.keys())[i])] = genetic_list2[format(list(genetic_list1.keys())[i])]
+            #     else:
+            #         cross_over_genetic[format(list(genetic_list1.keys())[i])] = format(list(genetic_list1.values())[i])
+        print('뛰어난 유전자 길이1', len(genetic_list1))
+        print('뛰어난 유전자 길이2', len(genetic_list2))
+        for i in range(len(genetic_list1)):
+            cross_over_genetic[format(list(genetic_list1.keys())[i])] = format(list(genetic_list1.values())[i])
+        for i in range(len(genetic_list2)):
+            if format(list(genetic_list2.keys())[i]) in cross_over_genetic:
+                random_for_cross = randint(1,2)
+                if random_for_cross == 2:
                     cross_over_genetic[format(list(genetic_list2.keys())[i])] = format(list(genetic_list2.values())[i])
-            elif i >= len(genetic_list1):
+            else:
                 cross_over_genetic[format(list(genetic_list2.keys())[i])] = format(list(genetic_list2.values())[i])
-            elif i >= len(genetic_list2):
-                if format(list(genetic_list1.keys())[i]) in genetic_list2:
-                    random_for_cross = randint(1,2)
-                    if random_for_cross == 1:
-                        cross_over_genetic[format(list(genetic_list1.keys())[i])] = format(list(genetic_list1.values())[i])
-                    else:
-                        cross_over_genetic[format(list(genetic_list1.keys())[i])] = genetic_list2[format(list(genetic_list1.keys())[i])]
-                else:
-                    cross_over_genetic[format(list(genetic_list1.keys())[i])] = format(list(genetic_list1.values())[i])
-        # print('뛰어난 유전자1', genetic_list1)
-        # print('뛰어난 유전자2', genetic_list2)
-        # print('크로스 오버', cross_over_genetic)
-        # print('교배한 유전자', cross_over_genetic)
 
     def mutation(self):
         for i in range(len(cross_over_genetic)):
@@ -346,7 +354,7 @@ class Thaad:
 
 #진행 시킬 컨트롤러
 
-for generation in range(10000):
+for generation in range(10):
     if first_time:
         for i in range(thaad_number):
             # succeed.clear()
@@ -386,6 +394,8 @@ for generation in range(10000):
         # print('fadsf', genetic_lists[0][1])
         first_time = False
     else:
+        # print('뛰어난 유전자1', genetic_list1)
+        # print('뛰어난 유전자2', genetic_list2)
         for i in range(thaad_number):
             thaad.crossOver()
             if i > thaad_number-3:
@@ -408,6 +418,7 @@ for generation in range(10000):
         thaad.select_Good_Genetic()
         print(str(generation+1),"세대 : ",'점수 목록', score_list)
         score_list.clear()
+        # print('뛰어난 것', thaad.good_genetic_index1, thaad.good_genetic_index2)
         thaad.store_Good_genetic()
         # print(genetic_list1)
         # print(genetic_list2)
